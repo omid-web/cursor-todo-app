@@ -37,14 +37,6 @@ jobs:
           fetch-depth: 0
           sparse-checkout: ${{ github.event.repository.owner.login }}/${{ github.event.repository.name }} # Only checkout the current repo
 
-      - name: Remove existing files in public
-        run: |
-          rm -rf public/*
-          find . -maxdepth 1 -type f ! -name ".git*" -exec mv '{}' public \;
-          find . -maxdepth 2 -type d -name "build" -exec mv '{}/*' public \;
-          find . -maxdepth 2 -type d -name "dist" -exec mv '{}/*' public \;
-          echo "Moved build/dist contents and top-level files to public"
-
       - name: Add and commit changes to public branch
         run: |
           cd public
