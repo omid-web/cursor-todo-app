@@ -1,0 +1,59 @@
+name: Build and Deploy on Merge to Main
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+jobs:
+  build_and_deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }} # Checkout the merged commit
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Checkout or create public branch
+        uses: actions/checkout@v4
+        with:
+          ref: public
+          persist-credentials: false
+          fetch-depth: 0
+          sparse-checkout: ${{ github.event.repository.owner.login }}/${{ github.event.repository.name }} # Only checkout the current repo
+
+      - name: Remove existing files in public
+        run: |
+          rm -rf public/*
+          find . -maxdepth 1 -type f ! -name ".git*" -exec mv '{}' public \;
+          find . -maxdepth 2 -type d -name "build" -exec mv '{}/*' public \;
+          find . -maxdepth 2 -type d -name "dist" -exec mv '{}/*' public \;
+          echo "Moved build/dist contents and top-level files to public"
+
+      - name: Add and commit changes to public branch
+        run: |
+          cd public
+          git add .
+          git commit -m "Deploy build from ${{ github.event.pull_request.head.ref }} merged into main (${{ github.sha }})" || echo "No changes to commit"
+
+      - name: Push to public branch
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: public
+          force: true # Overwrite the public branch with the latest build
