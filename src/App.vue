@@ -15,7 +15,7 @@ const addTodo = () => {
 <template>
   <div class="min-h-screen py-8 px-4">
     <div class="max-w-2xl mx-auto">
-      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Todo App</h1>
+      <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">My Todo App</h1>
       
       <div class="mb-6">
         <form @submit.prevent="addTodo" class="flex gap-2">
