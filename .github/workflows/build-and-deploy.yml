@@ -39,7 +39,7 @@ jobs:
 
       - name: Add and commit changes to public branch
         run: |
-          cd public
+          cd dist
           git add .
           git commit -m "Deploy build from ${{ github.event.pull_request.head.ref }} merged into main (${{ github.sha }})" || echo "No changes to commit"
 
